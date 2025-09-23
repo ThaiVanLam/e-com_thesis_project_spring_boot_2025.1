@@ -49,9 +49,10 @@ public class WebSecurityConfig {
         DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
         daoAuthenticationProvider.setUserDetailsService(userDetailsService);
         daoAuthenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider();
+        return daoAuthenticationProvider;
     }
 
+    @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
         return authConfig.getAuthenticationManager();
     }
@@ -63,7 +64,11 @@ public class WebSecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests((auth) -> auth.requestMatchers("/api/auth/**").permitAll().requestMatchers("/v3/api-docs/**").permitAll().requestMatchers("/h2-console/**").permitAll().requestMatchers("/swagger-ui/**").permitAll().requestMatchers("/api/public/**").permitAll().requestMatchers("/api/public/**").permitAll().requestMatchers("/api/test/**").permitAll().requestMatchers("/image/**").permitAll().anyRequest().authenticated());
+        http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests((auth) -> auth.requestMatchers("/api/auth/**").permitAll().requestMatchers("/v3/api-docs/**").permitAll().requestMatchers("/h2-console/**").permitAll().requestMatchers("/swagger-ui/**").permitAll()
+//                .requestMatchers("/api/admin/**").permitAll()
+//                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/test/**").permitAll()
+                .requestMatchers("/image/**").permitAll().anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFiler(), UsernamePasswordAuthenticationFilter.class);
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
@@ -103,17 +108,17 @@ public class WebSecurityConfig {
 
 
             // Create users if not already present
-            if (!userRepository.existsByUsername("user1")) {
+            if (!userRepository.existsByUserName("user1")) {
                 User user1 = new User("user1", "user1@example.com", passwordEncoder.encode("password1"));
                 userRepository.save(user1);
             }
 
-            if (!userRepository.existsByUsername("seller1")) {
+            if (!userRepository.existsByUserName("seller1")) {
                 User seller1 = new User("seller1", "seller1@example.com", passwordEncoder.encode("password2"));
                 userRepository.save(seller1);
             }
 
-            if (!userRepository.existsByUsername("admin")) {
+            if (!userRepository.existsByUserName("admin")) {
                 User admin = new User("admin", "admin@example.com", passwordEncoder.encode("adminPass"));
                 userRepository.save(admin);
             }
@@ -135,4 +140,6 @@ public class WebSecurityConfig {
             });
         };
     }
+
+
 }
