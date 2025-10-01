@@ -2,6 +2,7 @@ package com.ecommerce.project.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -19,20 +20,16 @@ public class WishList {
     private Integer wishlistId;
 
     @Column(name = "user_id")
-    @NotBlank
+    @NotNull
     private Long userId;
 
-    @NotBlank
+    @NotNull
     @Column(name = "product_id")
     private Long productId;
 
     @Column(name = "created_date")
     @CreationTimestamp
     private Date createdDate;
-
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "product_id", referencedColumnName = "id", insertable = false, updatable = false)
-    private Product product;
 
     public WishList(Long userId, Long productId) {
         this.userId = userId;
