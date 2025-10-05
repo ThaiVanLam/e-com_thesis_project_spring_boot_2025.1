@@ -29,11 +29,14 @@ public class AddressServiceImpl implements AddressService {
 
     @Override
     public AddressDTO createAddress(AddressDTO addressDTO) {
+        // Get current logged-in user
+        User user = authUtil.loggedInUser();
+
         // Map DTO to Entity
         Address address = modelMapper.map(addressDTO, Address.class);
 
-        // Get current logged-in user
-        User user = authUtil.loggedInUser();
+        // Set user to address
+        address.setUser(user);
 
         // Check if address already exists for this user
         List<Address> userAddresses = user.getAddresses();
@@ -42,18 +45,16 @@ public class AddressServiceImpl implements AddressService {
                         a.getStreet().equalsIgnoreCase(address.getStreet()) &&
                                 a.getBuildingName().equalsIgnoreCase(address.getBuildingName()) &&
                                 a.getCity().equalsIgnoreCase(address.getCity()) &&
+                                a.getState().equalsIgnoreCase(address.getState()) &&
                                 a.getPincode().equalsIgnoreCase(address.getPincode())
                 );
+
         if (addressExists) {
             throw new APIException("Address already exists for this user");
         }
 
-        // Save address
+        // Save address (cascade will automatically add to user's address list)
         Address savedAddress = addressRepository.save(address);
-
-        // Add address to user's address list
-        user.getAddresses().add(savedAddress);
-        userRepository.save(user);
 
         // Map entity back to DTO and return
         return modelMapper.map(savedAddress, AddressDTO.class);
