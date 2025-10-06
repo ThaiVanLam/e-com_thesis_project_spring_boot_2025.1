@@ -125,4 +125,20 @@ public class AddressServiceImpl implements AddressService {
         // Map entity back to DTO and return
         return modelMapper.map(updatedAddress, AddressDTO.class);
     }
+
+    @Override
+    public AddressDTO deleteAddress(Long addressId) {
+        // Find address by ID
+        Address address = addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address", "addressId", addressId));
+
+        // Map to DTO before deleting
+        AddressDTO addressDTO = modelMapper.map(address, AddressDTO.class);
+
+        // Delete address
+        addressRepository.delete(address);
+
+        // Return deleted address DTO
+        return addressDTO;
+    }
 }

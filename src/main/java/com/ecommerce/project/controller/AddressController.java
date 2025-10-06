@@ -46,4 +46,10 @@ public class AddressController {
         AddressDTO updatedAddressDTO = addressService.updateAddress(addressId, addressDTO);
         return new ResponseEntity<>(updatedAddressDTO, HttpStatus.OK);
     }
+
+    @DeleteMapping("/addresses/{addressId}")
+    public ResponseEntity<AddressDTO> deleteAddress(@PathVariable Long addressId) {
+        AddressDTO deletedAddressDTO = addressService.deleteAddress(addressId);
+        return new ResponseEntity<>(deletedAddressDTO, HttpStatus.OK);
+    }
 }
