@@ -13,4 +13,6 @@ public interface AddressService {
     AddressDTO getAddressById(Long addressId);
 
     List<AddressDTO> getAddressesByLoggedInUser();
+
+    AddressDTO updateAddress(Long addressId, @Valid AddressDTO addressDTO);
 }
