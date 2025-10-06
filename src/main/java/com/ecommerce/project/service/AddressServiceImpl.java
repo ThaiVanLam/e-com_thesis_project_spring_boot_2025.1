@@ -87,4 +87,22 @@ public class AddressServiceImpl implements AddressService {
         return modelMapper.map(address, AddressDTO.class);
     }
 
+    @Override
+    public List<AddressDTO> getAddressesByLoggedInUser() {
+        // Get current logged-in user
+        User user = authUtil.loggedInUser();
+
+        // Get all addresses for this user
+        List<Address> addresses = user.getAddresses();
+
+        if (addresses.isEmpty()) {
+            throw new APIException("No addresses found for this user");
+        }
+
+        // Map list of entities to list of DTOs
+        return addresses.stream()
+                .map(address -> modelMapper.map(address, AddressDTO.class))
+                .collect(Collectors.toList());
+    }
+
 }
