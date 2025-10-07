@@ -36,7 +36,7 @@ public class Order {
     @JoinColumn(name = "address_id")
     private Address address;
 
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.PERSIST})
     @JoinColumn(name = "payment_id")
     private Payment payment;
 }
