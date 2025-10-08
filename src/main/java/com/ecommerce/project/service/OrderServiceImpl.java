@@ -1,18 +1,18 @@
 package com.ecommerce.project.service;
 
+import com.ecommerce.project.exceptions.APIException;
 import com.ecommerce.project.exceptions.ResourceNotFoundException;
-import com.ecommerce.project.model.Address;
-import com.ecommerce.project.model.Cart;
-import com.ecommerce.project.model.Order;
-import com.ecommerce.project.model.Payment;
+import com.ecommerce.project.model.*;
 import com.ecommerce.project.payload.OrderDTO;
-import com.ecommerce.project.repositories.AddressRepository;
-import com.ecommerce.project.repositories.CartRepository;
-import com.ecommerce.project.repositories.OrderRepository;
+import com.ecommerce.project.payload.OrderItemDTO;
+import com.ecommerce.project.repositories.*;
 import jakarta.transaction.Transactional;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OrderServiceImpl implements OrderService {
     @Autowired
@@ -23,6 +23,18 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    OrderItemRepository orderItemRepository;
+
+    @Autowired
+    private CartService cartService;
+
+    @Autowired
+    private ProductRepository productRepository;
+
+    @Autowired
+    private ModelMapper modelMapper;
 
     @Override
     @Transactional
@@ -46,6 +58,42 @@ public class OrderServiceImpl implements OrderService {
         order.setPayment(payment);
 
         Order savedOrder = orderRepository.save(order);
+
+        List<CartItem> cartItems = cart.getCartItems();
+        if (cartItems.isEmpty()) {
+            throw new APIException("Cart is empty");
+        }
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (CartItem cartItem : cartItems) {
+            OrderItem orderItem = new OrderItem();
+            orderItem.setProduct(cartItem.getProduct());
+            orderItem.setQuantity(cartItem.getQuantity());
+            orderItem.setDiscount(cartItem.getDiscount());
+            orderItem.setOrderedProductPrice(cartItem.getProductPrice());
+            orderItem.setOrder(savedOrder);
+            orderItems.add(orderItem);
+        }
+
+        orderItems = orderItemRepository.saveAll(orderItems);
+
+        cart.getCartItems().forEach(item -> {
+            int quantity = item.getQuantity();
+            Product product = item.getProduct();
+
+            // Reduce stock quantity
+            product.setQuantity(product.getQuantity() - quantity);
+
+            // Save product back to the database
+            productRepository.save(product);
+
+            // Remove items from cart
+            cartService.deleteProductFromCart(cart.getCartId(), item.getProduct().getProductId());
+        });
+
+        // send back the order summary
+        OrderDTO orderDTO = modelMapper.map(savedOrder, OrderDTO.class);
+        orderItems.forEach(item -> orderDTO.getOrderItems().add(modelMapper.map(item, OrderItemDTO.class)));
 
         return null;
     }
