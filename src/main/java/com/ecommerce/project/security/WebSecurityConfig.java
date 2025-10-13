@@ -66,7 +66,7 @@ public class WebSecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable).exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler)).sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)).authorizeHttpRequests((auth) -> auth.requestMatchers("/api/auth/**").permitAll().requestMatchers("/v3/api-docs/**").permitAll().requestMatchers("/h2-console/**").permitAll().requestMatchers("/swagger-ui/**").permitAll()
 //                .requestMatchers("/api/admin/**").permitAll()
-//                .requestMatchers("/api/public/**").permitAll()
+                .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/test/**").permitAll()
                 .requestMatchers("/image/**").permitAll().anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
