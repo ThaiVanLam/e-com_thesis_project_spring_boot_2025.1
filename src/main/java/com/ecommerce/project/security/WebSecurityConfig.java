@@ -68,7 +68,7 @@ public class WebSecurityConfig {
 //                .requestMatchers("/api/admin/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 .requestMatchers("/api/test/**").permitAll()
-                .requestMatchers("/image/**").permitAll().anyRequest().authenticated());
+                .requestMatchers("/images/**").permitAll().anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());
         http.addFilterBefore(authenticationJwtTokenFiler(), UsernamePasswordAuthenticationFilter.class);
         http.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()));
